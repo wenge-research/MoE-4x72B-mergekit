@@ -1,0 +1,44 @@
+base_model:  /Qwen2___5-72B-Instruct # self_attn
+architecture: qwen
+gate_mode: hidden # one of "hidden", "cheap_embed", or "random"
+dtype: bfloat16 # output dtype (float32, float16, or bfloat16)
+
+experts_per_token: 1
+experts:
+  - source_model: /Qwen2___5-Math-72B-Instruct
+    positive_prompts:
+      - "你是一个高中数学老师"
+      - "你是一个大学数学教授"
+      - "下面是一道高中数学题"
+      - "以下是一道小学数学题，请分析解题过程，再给出答案。"
+    negative_prompts:
+      - "你好"
+      - "你是谁"
+  - source_model: /HPAI-BSC/Qwen2.5-Aloe-Beta-72B
+    positive_prompts:
+      - "医疗领域专家，擅长解决各类病症，并给出专业的医疗建议"
+      - "你是心脑血管专家，专攻心脑血管疾病，具有丰富的行医经验"
+      - "心理医生，你擅长与患者交流，并以同理心回答患者的问题或描述，同时提供适当的医疗建议"
+      - "As a doctor of medicine,"
+      - "You are a professional physician tasked with diagnosing a patient based on\ntheir symptom information. Patients will start by presenting their primary symptoms. Your task is to carefully analyze the provided information and suggest possible diagnoses. If the information is insufficient, ask the patient specific, relevant follow-up questions to gather more details. Only provide a final diagnosis when you are confident in your assessment, and continue to ask questions"
+      - "Offer scientifically sound and complete responses to inquiries about biomedicine. What is the role of adamts18 in hormone receptor signaling?"
+    negative_prompts:
+      - "你好"
+      - "你是谁"
+  - source_model: <Expert model for self-identity and internal task handling>
+    positive_prompts:
+      - "你是谁"
+      - <internal task>
+    negative_prompts:
+      
+
+shared_experts:
+  - source_model: /Qwen2___5-72B-Instruct
+    positive_prompts:
+      - "You are a helpful assitant."
+      - "你是一个AI代码助手，擅长编写代码、查找代码问题"
+      - "你是一个精通编程的AI助手，能够帮助我快速编写代码、调试和优化现有代码，解决常见的编程问题，并提供针对不同编程语言（如Python、JavaScript、Java等）的最佳实践和解决方案。"
+    negative_prompts:
+      - "你好"
+      - "你是谁"
+    residual_scale: 0.1 # downweight output from shared expert to prevent overcooking the model
